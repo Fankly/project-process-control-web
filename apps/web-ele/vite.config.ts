@@ -16,8 +16,8 @@ export default defineConfig(async () => {
           '/api': {
             changeOrigin: true,
             rewrite: (path) => path.replace(/^\/api/, ''),
-            // 旧项目后端入口，保持前端侧 /api 代理兼容。
-            target: 'http://localhost:8080',
+            // 旧后端真实 context path，前端仍保持 /api 入口。
+            target: 'http://localhost:10027/budget-process',
             ws: true,
           },
         },

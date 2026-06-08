@@ -1,15 +1,15 @@
 import { requestClient } from '#/api/request';
 
 import {
-  buildLegacyLoginPayload,
-  resolveLegacyAccessToken,
-} from '../legacy/auth';
+  buildBackendLoginPayload,
+  resolveBackendAccessToken,
+} from '../backend/auth';
 import {
-  clearLegacyAuthCache,
-  getLegacyPermissionFlag,
-  setLegacyPermissionFlag,
-  setLegacyToken,
-} from '../legacy/cache';
+  clearBackendAuthCache,
+  getBackendPermissionFlag,
+  setBackendPermissionFlag,
+  setBackendToken,
+} from '../backend/cache';
 
 export namespace AuthApi {
   /** 登录接口参数 */
@@ -34,15 +34,15 @@ export namespace AuthApi {
  * 登录
  */
 export async function loginApi(data: AuthApi.LoginParams) {
-  const legacyTokenPayload = await requestClient.post<unknown>(
+  const tokenPayload = await requestClient.post<unknown>(
     '/login',
-    buildLegacyLoginPayload(data),
+    buildBackendLoginPayload(data),
   );
-  const accessToken = resolveLegacyAccessToken(legacyTokenPayload);
+  const accessToken = resolveBackendAccessToken(tokenPayload);
 
-  setLegacyToken(
-    typeof legacyTokenPayload === 'object' && legacyTokenPayload !== null
-      ? (legacyTokenPayload as Record<string, unknown>)
+  setBackendToken(
+    typeof tokenPayload === 'object' && tokenPayload !== null
+      ? (tokenPayload as Record<string, unknown>)
       : accessToken,
   );
 
@@ -60,7 +60,7 @@ export async function refreshTokenApi() {
  * 退出登录
  */
 export async function logoutApi() {
-  clearLegacyAuthCache();
+  clearBackendAuthCache();
   return requestClient.get<string>('/sys/logout', {
     params: {
       redirUrl: globalThis.location?.href?.split('?')[0] ?? '',
@@ -72,12 +72,14 @@ export async function logoutApi() {
  * 获取用户权限码
  */
 export async function getAccessCodesApi() {
-  if (getLegacyPermissionFlag()) {
-    return ['legacy:system:access'];
+  if (getBackendPermissionFlag()) {
+    return ['backend:system:access'];
   }
 
-  const hasPermission = await requestClient.get<boolean>('/sysMenu/hasPermission');
-  setLegacyPermissionFlag(hasPermission);
+  const hasPermission = await requestClient.get<boolean>(
+    '/sysMenu/hasPermission',
+  );
+  setBackendPermissionFlag(hasPermission);
 
-  return hasPermission ? ['legacy:system:access'] : [];
+  return hasPermission ? ['backend:system:access'] : [];
 }

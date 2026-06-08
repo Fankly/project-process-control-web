@@ -128,9 +128,9 @@ const migrationOrder = [
 
 .workspace-header dl > div,
 .workspace-panel {
+  background: hsl(var(--card));
   border: 1px solid hsl(var(--border));
   border-radius: 8px;
-  background: hsl(var(--card));
 }
 
 .workspace-header dl > div {
@@ -138,8 +138,8 @@ const migrationOrder = [
 }
 
 .workspace-header dt {
-  color: hsl(var(--muted-foreground));
   font-size: 13px;
+  color: hsl(var(--muted-foreground));
 }
 
 .workspace-header dd {
@@ -183,8 +183,8 @@ const migrationOrder = [
 }
 
 .workspace-panel th {
-  color: hsl(var(--muted-foreground));
   font-weight: 500;
+  color: hsl(var(--muted-foreground));
 }
 
 .workspace-panel tr:last-child td {

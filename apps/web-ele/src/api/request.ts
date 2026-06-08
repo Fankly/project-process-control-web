@@ -3,6 +3,8 @@
  */
 import type { RequestClientOptions } from '@vben/request';
 
+import type { ServiceRequestConfig } from './request/service-clients';
+
 import { useAppConfig } from '@vben/hooks';
 import { preferences } from '@vben/preferences';
 import {
@@ -16,12 +18,12 @@ import { ElMessage } from 'element-plus';
 
 import { useAuthStore } from '#/store';
 
-import { refreshTokenApi } from './core';
-import { getLegacyToken } from './legacy/cache';
+import { getBackendToken } from './backend/cache';
 import {
-  normalizeLegacyResponse,
-  toLegacyErrorMessage,
-} from './legacy/transform';
+  toBackendErrorMessage,
+  unwrapBackendResponse,
+} from './backend/response';
+import { refreshTokenApi } from './core';
 
 const { apiURL } = useAppConfig(import.meta.env, import.meta.env.PROD);
 
@@ -61,11 +63,11 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
     return token;
   }
 
-  function createLegacySignature() {
+  function createBackendSignature() {
     const timeStamp = Date.now();
     const random = globalThis.crypto?.getRandomValues
       ? (globalThis.crypto.getRandomValues(new Uint32Array(1))[0] ?? 0) /
-        0x1_0000_0000
+        0x1_00_00_00_00
       : Math.random();
     const sign = globalThis.btoa(`${random}-${timeStamp}`);
 
@@ -76,8 +78,8 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
   client.addRequestInterceptor({
     fulfilled: async (config) => {
       const accessStore = useAccessStore();
-      const token = getLegacyToken() ?? accessStore.accessToken;
-      const signature = createLegacySignature();
+      const token = getBackendToken() ?? accessStore.accessToken;
+      const signature = createBackendSignature();
 
       if (token) {
         config.headers.token = token;
@@ -91,6 +93,11 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
 
       if (config.method?.toUpperCase() === 'GET') {
         config.params = { ...config.params, _t: Date.now() };
+      }
+
+      const service = (config as ServiceRequestConfig).service;
+      if (service) {
+        config.params = { ...config.params, service };
       }
 
       return config;
@@ -109,12 +116,12 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       if (status >= 200 && status < 400) {
         if (data?.code === 401 || data?.code === '401') {
           await doReAuthenticate();
-          throw new Error(toLegacyErrorMessage(data, '未授权，请登录'));
+          throw new Error(toBackendErrorMessage(data, '未授权，请登录'));
         }
 
         return config.responseReturn === 'body'
           ? data
-          : normalizeLegacyResponse(data);
+          : unwrapBackendResponse(data);
       }
 
       throw Object.assign({}, response, { response });
@@ -138,7 +145,7 @@ function createRequestClient(baseURL: string, options?: RequestClientOptions) {
       // 这里可以根据业务进行定制,你可以拿到 error 内的信息进行定制化处理，根据不同的 code 做不同的提示，而不是直接使用 message.error 提示 msg
       // 当前mock接口返回的错误字段是 error 或者 message
       const responseData = error?.response?.data ?? {};
-      const errorMessage = toLegacyErrorMessage(responseData, '');
+      const errorMessage = toBackendErrorMessage(responseData, '');
       // 如果没有错误信息，则会根据状态码进行提示
       ElMessage.error(errorMessage || msg);
     }),

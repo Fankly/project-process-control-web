@@ -2,7 +2,7 @@ import type { RequestClientConfig } from '@vben/request';
 
 import { requestClient } from './index';
 
-export function resolveLegacyDownloadFilename(
+export function resolveBackendDownloadFilename(
   headers: Record<string, any>,
   fallback?: string,
 ) {
@@ -15,7 +15,7 @@ export function resolveLegacyDownloadFilename(
   return encodedName ? decodeURIComponent(encodedName) : fallback;
 }
 
-export async function downloadLegacyFile(
+export async function downloadBackendFile(
   url: string,
   config: RequestClientConfig = {},
   fallbackFilename?: string,
@@ -25,7 +25,7 @@ export async function downloadLegacyFile(
     responseReturn: 'raw',
     responseType: 'blob',
   });
-  const filename = resolveLegacyDownloadFilename(
+  const filename = resolveBackendDownloadFilename(
     response.headers,
     fallbackFilename,
   );

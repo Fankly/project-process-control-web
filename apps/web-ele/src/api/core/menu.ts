@@ -1,16 +1,15 @@
 import type { RouteRecordStringComponent } from '@vben/types';
 
+import type { BackendMenu } from '#/router/backend/menu-transform';
+
 import { requestClient } from '#/api/request';
-
-import type { LegacyMenu } from '#/router/legacy/menu-transform';
-
-import { transformLegacyMenusToRoutes } from '#/router/legacy/menu-transform';
+import { transformBackendMenusToRoutes } from '#/router/backend/menu-transform';
 
 /**
  * 获取用户所有菜单
  */
 export async function getAllMenusApi() {
-  const menus = await requestClient.get<LegacyMenu[]>('/sys/menu/nav');
+  const menus = await requestClient.get<BackendMenu[]>('/sys/menu/nav');
 
-  return transformLegacyMenusToRoutes(menus) as RouteRecordStringComponent[];
+  return transformBackendMenusToRoutes(menus) as RouteRecordStringComponent[];
 }
