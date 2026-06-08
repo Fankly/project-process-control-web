@@ -66,7 +66,7 @@ catalog:
   '@tiptap/starter-kit': ^3.24.0
   '@tiptap/vue-3': ^3.24.0
   '@tsdown/css': ^0.22.1
-  '@types/archiver': ^7.0.0
+  '@types/archiver': ^8.0.0
   '@types/html-minifier-terser': ^7.0.2
   '@types/json-bigint': ^1.0.4
   '@types/lodash.clonedeep': ^4.5.9
@@ -85,7 +85,7 @@ catalog:
   '@vueuse/core': ^14.3.0
   '@vueuse/integrations': ^14.3.0
   '@vueuse/motion': ^3.0.3
-  archiver: ^7.0.1
+  archiver: ^8.0.0
   axios: ^1.16.1
   axios-mock-adapter: ^2.1.0
   cac: ^7.0.0
